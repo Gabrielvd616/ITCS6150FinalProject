@@ -1,0 +1,11 @@
+M:\AI ONLINE F25 01\rust-drive-ai\target\release\deps\bevy_egui-627be6b17ac504c5.d: C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\lib.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\render_systems.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\systems.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\egui_node.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\egui.wgsl
+
+M:\AI ONLINE F25 01\rust-drive-ai\target\release\deps\libbevy_egui-627be6b17ac504c5.rlib: C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\lib.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\render_systems.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\systems.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\egui_node.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\egui.wgsl
+
+M:\AI ONLINE F25 01\rust-drive-ai\target\release\deps\libbevy_egui-627be6b17ac504c5.rmeta: C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\lib.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\render_systems.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\systems.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\egui_node.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\egui.wgsl
+
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\lib.rs:
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\render_systems.rs:
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\systems.rs:
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\egui_node.rs:
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bevy_egui-0.20.3\src\egui.wgsl:

@@ -1,0 +1,11 @@
+M:\AI ONLINE F25 01\rust-drive-ai\target\release\deps\libc-e67621c263dda178.d: C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\lib.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\macros.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\fixed_width_ints.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\windows\mod.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\windows\msvc\mod.rs
+
+M:\AI ONLINE F25 01\rust-drive-ai\target\release\deps\liblibc-e67621c263dda178.rlib: C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\lib.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\macros.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\fixed_width_ints.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\windows\mod.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\windows\msvc\mod.rs
+
+M:\AI ONLINE F25 01\rust-drive-ai\target\release\deps\liblibc-e67621c263dda178.rmeta: C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\lib.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\macros.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\fixed_width_ints.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\windows\mod.rs C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\windows\msvc\mod.rs
+
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\lib.rs:
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\macros.rs:
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\fixed_width_ints.rs:
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\windows\mod.rs:
+C:\Users\MADDY\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\libc-0.2.142\src\windows\msvc\mod.rs:

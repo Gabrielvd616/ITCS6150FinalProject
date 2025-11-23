@@ -1,0 +1,3 @@
+cargo:rerun-if-changed=build/main.rs
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=M:\AI ONLINE F25 01\rust-drive-ai\target\release\build\typenum-1658af4415608500\out\consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=M:\AI ONLINE F25 01\rust-drive-ai\target\release\build\typenum-1658af4415608500\out\op.rs
