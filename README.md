@@ -10,7 +10,6 @@ This repository contains a comprehensive autonomous vehicle navigation system im
 - [System Run Instructions](#system-run-instructions)
 - [Folder Structure](#folder-structure)
 - [Demo Video](#demo-video)
-- [License & Credits](#license--credits)
 
 ---
 
@@ -122,4 +121,5 @@ See the system in action here:
 
 - You can tweak parameters such as sensor count, neural network size, and pathfinding grid in `src/configs.rs` to customize behavior.
 - For extending the system, consider adding new sensors, modifying the neural network architecture, or introducing new obstacle types.
+
 
