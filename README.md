@@ -121,5 +121,3 @@ See the system in action here:
 
 - You can tweak parameters such as sensor count, neural network size, and pathfinding grid in `src/configs.rs` to customize behavior.
 - For extending the system, consider adding new sensors, modifying the neural network architecture, or introducing new obstacle types.
-
-
