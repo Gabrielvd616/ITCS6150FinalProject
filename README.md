@@ -43,7 +43,7 @@ Open a terminal and run:
 
 ```bash
 git clone https://github.com/Gabrielvd616/ITCS6150FinalProject.git
-cd your-repo
+cd ITCS6150FinalProject
 ```
 
 ### Build the Project
