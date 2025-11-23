@@ -1,4 +1,4 @@
-# Virtual Autonomous Vehicle Navigation System in Rust
+# Autonomous Vehicle Navigation System
 
 This repository contains a comprehensive autonomous vehicle navigation system implemented in Rust using the Bevy game engine and Rapier physics. The system features two control approaches: Neural Network + Genetic Algorithm (NN+GA) for learning to navigate through evolutionary improvements, and A* Pathfinding for obstacle-aware grid-based navigation.
 
@@ -10,7 +10,6 @@ This repository contains a comprehensive autonomous vehicle navigation system im
 - [System Run Instructions](#system-run-instructions)
 - [Folder Structure](#folder-structure)
 - [Demo Video](#demo-video)
-- [License & Credits](#license--credits)
 
 ---
 

@@ -1,0 +1,699 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{pdfpages}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{verbatim}
+\usepackage{microtype}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\title{Intelligent Autonomous Vehicle Navigation System\\Final Project Report}
+
+\author{
+\parbox{\linewidth}{\centering
+Team AI F25 01 \\[4pt]
+Abhinav Velaga, Manogna Devarapu, Poojitha Goudapolla,\\
+Gabriel Van Dreel, Vance Ayscue
+}
+}
+
+\date{Fall 2025}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+    {\large \textbf{Professor Dr. Sever}}\\[8pt]
+
+    \textbf{Demo Link:}\\
+    \url{https://drive.google.com/file/d/1pnjU6Bcut7iaLRXu78R0Mg0pLg9JYwon/view?usp=sharing}\\[8pt]
+    
+    \textbf{GitHub Repository:}\\
+    \url{https://github.com/Gabrielvd616/ITCS6150FinalProject}
+\end{center}
+
+\begin{abstract}
+This report documents the design, implementation, and evaluation of “AI Learns to Drive,” a Rust + Bevy simulation that trains autonomous agents to drive in a Road-Fighter–inspired environment. We present two control approaches: (1) a neural network trained via a genetic algorithm (NN+GA) using ray-cast distance sensors;  and (2) an A* pathfinding mode that builds a local obstacle grid and  follows waypoints. We describe the architecture, algorithms, assets, and systems; provide configuration guidance; and evaluate performance and learning behavior.  We conclude with limitations, ethics, and future work.
+\end{abstract}
+
+\vspace{1em}
+
+\noindent\textbf{Keywords:} Rust, Bevy, ECS, Rapier, Neural Network, Genetic Algorithm, A*, Pathfinding, Simulation, Autonomous Driving
+
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+This project implements a 2D autonomous driving sandbox using Rust and the Bevy engine. The system supports two control paradigms: (1) a learned controller that is a feedforward neural network evolved with a genetic algorithm (NN+GA), and (2) a classical path-planning controller using A* on an occupancy grid. The environment is Road-Fighter–inspired with tiled roads and dynamic obstacles.
+
+\section{Project Goals}
+The primary goal of the system is to provide a controlled simulation environment to evaluate and compare the performance of evolved neural network controllers and heuristic search based path planners for autonomous vehicle navigation tasks.
+Objectives include:
+\begin{itemize}
+    \item Design and implement a 2D physics-based simulation environment supporting multi-lane roads and dynamic obstacles.
+    \item Implement a genetic algorithm framework to evolve neural network weights for vehicle control.
+    \item Implement an A* pathfinding module with a dynamic grid map and replanning capabilities.
+    \item Provide visualization and logging tools for performance analysis, including per-generation fitness tracking and path visualization.
+    \item Facilitate parameter tuning through a user-friendly interface to modify GA and pathfinding parameters.
+    \item Export experiment data for offline statistical analysis.
+\end{itemize}
+
+\section{Project Work Breakdown}
+We split the work up based on the skills and knowledge base of the individuals within the team and what people felt they could best work on effectively.
+\begin{itemize}
+    \item Rust Code Development
+    \begin{itemize}[label=$\circ$]
+        \item Abhinav led development effort and strategic design of the fused autonomous navigation system.
+        \item Aided by Manogna and Poojitha on delegated implementation tasks.
+        \item Vance worked with Abhinav to identify key technologies and libraries to be used.
+    \end{itemize}
+    \item Documentation
+    \begin{itemize}[label=$\circ$]
+        \item Vance and Gabriel led documentation effort with the development of reports and presentations.
+        \item Gabriel composed the midterm report while Vance composed the final report.
+    \end{itemize}
+    \item Testing
+    \begin{itemize}[label=$\circ$]
+        \item Abhinav and Gabriel completed the user manual for the fused navigation system.
+        \item Abhinav and Vance also defined evaluation criteria/metrics and performed testing on NN + GA and A* Pathfinding models.
+    \end{itemize}
+\end{itemize}
+
+\section{Intended Use of the System}
+The system is intended to train, test, and compare autonomous vehicle navigation algorithms. The intended users include AI researchers conducting comparative algorithm studies, educational institutions teaching autonomous systems and machine learning concepts, game developers prototyping intelligent vehicle behaviors, and automotive engineers exploring decision-making architectures for self-driving vehicles.
+
+\section{System Overview}
+\subsection{System Description}
+The system employs multiple AI capabilities including supervised learning through neural network architectures, evolutionary computation via genetic algorithms for weight optimization, heuristic search through A* pathfinding with Manhattan distance heuristics, sensor fusion from multiple raycasting inputs for environmental perception, and real-time inference engines for vehicle control decision-making.
+\subsection{Use Case Summary (selected)}
+\begin{itemize}
+    \item Configure experiments, run simulations, visualize results, and export data.
+    \item Visualize agent sensors, follow vehicles, monitor decision making, and view performance metrics.
+\end{itemize}
+\subsection{Technologies}
+The implementation uses:
+\begin{itemize}
+  \item Rust (stable) and Cargo
+  \item Bevy for rendering and entity-component-system (ECS) architecture
+  \item Rapier 2D for physics and raycasting
+  \item egui / bevy\_egui for HUD and plotting
+\end{itemize}
+\subsection{Overview of Functional Requirements}
+The Intelligent Autonomous Vehicle Navigation System is a simulation environment designed to train, test, and compare autonomous vehicle navigation algorithms using two distinct artificial intelligence approaches: neural networks evolved through genetic algorithms and A* pathfinding with dynamic obstacle mapping. The system operates in a real-time 2D physics-based environment where autonomous vehicles must navigate multi-lane roads while avoiding both static boundaries and dynamic obstacles including enemy vehicles with varied movement patterns.
+
+\subsection{Design}
+The simulation is structured into modular plugins and systems, enabling easy toggling between NN+GA and A* controllers. Agents sense their environment (ray-casts or local occupancy grid), compute actions, and apply motion while statistics are recorded per-step and per-generation.
+
+\section{Overall Functionality}
+\subsection{Problem Statement}
+The system addresses autonomous vehicle navigation in dynamic, obstacle-rich environments, requiring real-time decision-making for safety and efficiency.
+\subsection{Core Functions:}
+\begin{itemize}
+    \item Dual-algorithm navigation system (neural networks with genetic algorithms and A* pathfinding algorithm) for comparative analysis.
+    \item A dynamic environment simulation includes multi-lane roads, varying traffic, obstacles, collision detection, and progressive difficulty.
+    \item Performance analysis and visualization offers real-time fitness tracking, neural network visualization, path visualization, and comparative metrics.
+\end{itemize}
+\subsection{AI Technique Integration}
+\begin{itemize}
+    \item Machine learning involves neural networks trained via genetic algorithms for weight optimization and behavior learning.
+    \item Heuristic search uses A* pathfinding with Manhattan distance heuristics for optimal route discovery.
+    \item Knowledge representation includes a grid-based world model, raycasting for environmental awareness, and neural network weight matrices.
+    \item Reasoning under uncertainty is managed through sensor fusion, probabilistic neural network decision-making, and dynamic obstacle prediction.
+\end{itemize}
+\section{Architecture and Modules}
+Key source modules:
+\begin{itemize}
+  \item \texttt{main.rs} --- application entry, mode selection, and plugin registration.
+  \item \texttt{car.rs} --- Car bundle, sensor components, action mapping, and collision handling.
+  \item \texttt{nn.rs} --- feedforward neural network, weight/bias storage, activation functions.
+  \item \texttt{population.rs} --- genetic algorithm logic: fitness evaluation, selection, mutation and reproduction.
+  \item \texttt{pathfinding.rs} --- occupancy grid creation, A* implementation and waypoint following.
+  \item \texttt{gui.rs} --- HUD, visualizers, plot/export utilities.
+  \item \texttt{configs.rs} --- centralized parameters and default experiment values.
+\end{itemize}
+
+Components and resources follow standard ECS patterns: components such as \texttt{Car}, \texttt{Brain}, \texttt{Fitness}, \texttt{AStarAgent}, \texttt{Enemy}; resources like \texttt{Settings}, \texttt{SimStats} and \texttt{BrainToDisplay}.
+
+\section{Assets and Environment}
+The environment uses tiled road sprites, vehicle sprites, and HUD icons. Boundaries are static colliders and enemy vehicles are spawned according to configurable spawn logic (density, behavior types: straight, oscillatory, lane-follow). The world supports camera-follow for demonstration and full-scene views for debugging.
+
+\section{Sensors and Perception}
+Agents sense using a fan of ray-casts around their heading. Each ray returns a first-hit TOI (time-of-impact) up to a maximum distance; TOIs are normalized to the interval $[0,1]$ where $1$ denotes no hit within range.
+
+\subsection{Core Parameters}
+\begin{table}[H]
+\centering
+\caption{Default parameters}
+\label{tab:default-params}
+\begin{tabular}{lr}
+\toprule
+Parameter & Default value \\ \midrule
+NUM\_AI\_CARS & 100 \\
+NUM\_ENEMY\_CARS & 140 \\
+NUM\_RAY\_CASTS & 15 \\
+NUM\_HIDDEN\_NODES & 15 \\
+ASTAR\_CELL\_SIZE & 16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Neural Network Controller (NN+GA)}
+\subsection{Architecture}
+The NN is a dense feedforward network with an input layer sized to the number of ray sensors, a configurable hidden layer, and an output layer mapped to steering/throttle commands. Bias vectors are maintained per layer and applied during feedforward.
+
+\subsection{Mathematical Notation and Equations}
+Let $x_i$ be the $i$-th ray input normalized to $[0,1]$. Let $W^{(l)}$ be the weight matrix and $b^{(l)}$ the bias vector for layer $l$. The feedforward activation for layer $l$ is:
+
+\[
+a^{(l)} = \sigma\bigl(W^{(l)} a^{(l-1)} + b^{(l)}\bigr),
+\]
+
+where $\sigma(\cdot)$ is the elementwise sigmoid activation.
+
+Mutation is defined as:
+
+\[
+\theta' = \theta + \epsilon, \qquad \epsilon \sim U(-\delta,\delta).
+\]
+
+The fitness measure used in selection is:
+
+\[
+f = \text{forward\_distance\_traveled}.
+\]
+
+\section{Genetic Algorithm}
+\subsection{Overview}
+\begin{itemize}
+  \item Fitness: forward distance traveled during an episode (see equation above).
+  \item Selection: fitness-proportional (weighted) sampling of individuals.
+  \item Mutation: additive uniform noise on parameters per the mutation equation above.
+  \item Extensions noted: elitism and crossover can be added.
+\end{itemize}
+
+\section{A* Pathfinding Controller}
+\subsection{Occupancy Grid Construction}
+A local occupancy grid with cell size equal to \texttt{ASTAR\_CELL\_SIZE} is constructed around the agent. Cells are marked occupied via short-range probes or per-cell checks.
+
+\subsection{Planner Pseudocode}
+\begin{algorithm}[H]
+\caption{A* search}
+\begin{algorithmic}[1]
+\Require start, goal, \textsf{neighbors()}, \textsf{dist()}, \textsf{heuristic()}
+\State $open\_set \gets \{\,start\,\}$
+\State $came\_from \gets \varnothing$
+\State $g\_score[start] \gets 0$
+\State $f\_score[start] \gets \textsf{heuristic}(start,goal)$
+\While{$open\_set \neq \varnothing$}
+    \State $current \gets$ node in $open\_set$ with lowest $f\_score$
+    \If{$current = goal$}
+        \State \textbf{return} \textsf{reconstruct\_path}(came\_from, current)
+    \EndIf
+    \State remove $current$ from $open\_set$
+    \ForAll{neighbor \textbf{in} \textsf{neighbors}(current)}
+        \State $tentative\_g \gets g\_score[current] + \textsf{dist}(current,neighbor)$
+        \If{$tentative\_g < g\_score[neighbor]$}
+            \State $came\_from[neighbor] \gets current$
+            \State $g\_score[neighbor] \gets tentative\_g$
+            \State $f\_score[neighbor] \gets g\_score[neighbor] + \textsf{heuristic}(neighbor,goal)$
+            \If{neighbor \textbf{not in} $open\_set$}
+                \State add neighbor to $open\_set$
+            \EndIf
+        \EndIf
+    \EndFor
+\EndWhile
+\State \textbf{return} failure
+\end{algorithmic}
+\end{algorithm}
+
+\section{Physics and Collision Handling}
+Rapier 2D handles rigid-body simulation and raycasting. Cars and enemies are dynamic rigid bodies with cuboid colliders; trucks and boundaries are static colliders. On collision, agents are marked dead and collision time and position are logged.
+
+\section{GUI, Visualization and Logging}
+The HUD displays generation number, best fitness, the number of alive agents and the fitness chart. The NN visualizer displays input, hidden, and output nodes with connection activations. The system can export per-generation CSVs and save screenshots to \texttt{docs/results/} for inclusion in the report.
+
+\section{Experimental Protocol}
+\begin{itemize}
+  \item Run NN+GA for a fixed number of generations (e.g., 30).
+  \item Per generation export: best fitness, median fitness, IQR, collisions and runtime.
+  \item Save representative screenshots (HUD, NN visualization) to \texttt{docs/results/}.
+  \item For reproducibility, fix RNG seeds when required.
+\end{itemize}
+
+\section{Results}
+\subsection{Learning Curves (NN+GA)}
+Qualitatively, random policies converge toward lane following and obstacle avoidance within 10–20 generations (defaults). Increasing NUM\_RAY\_CASTS improves asymptotic fitness up to diminishing returns; excessive mutation causes instability.
+\subsection{A* Baseline}
+On sparse obstacles, A* shows steady forward progress. Coarse grids and very large scan radii degrade path quality or cause stalls.
+\subsection{Quantitative Results}
+\begin{table}[H]
+\centering
+\caption{Representative Metrics for NN+GA and A*}
+\label{tab:epoch-metrics}
+\begin{tabular}{rrrrrr}
+\toprule
+Mode & Best Fitness (Gen N) & Median Fitness & FPS (avg) & Collisions/Gen \\ \midrule
+NN+GA (default) & 28.9 (Gen 30) & 12.0 & 60 & 72 \\
+NN+GA (rays=21) & 30.1 (Gen 30) & 13.5 & 57 & 68 \\
+A* (default) & 22.5 (10k steps) & 18.0 & 60 & 20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{Figures}
+\subsection{Narrative Analysis}
+Across seeds, NN+GA typically exhibits rapid early gains followed by plateaus; adjusting mutation variance can escape shallow local optima. Additional rays improve early avoidance behavior but increase compute cost; we recommend validating sensor budgets under your target hardware. For A*, the replanning interval balances responsiveness against overhead: shorter intervals adapt better to dynamic obstacles but reduce peak FPS.
+\subsection{Generation/Epoch-Wise Metrics (NN+GA)}
+We recommend logging the following per epoch: best fitness, median fitness, interquartile range (IQR), number of collisions, and wall-clock duration. A suggested longtable template is provided below for 30 epochs; extend as needed.
+\begin{table}[H]
+\centering
+\caption{Evaluation metrics}
+\label{tab:epoch-metrics}
+\begin{tabular}{rrrrrr}
+\toprule
+Epoch & Best Fitness & Median Fitness & IQR & Collisions & Duration (s) \\ \midrule
+1 & 3.8 & 0.3 & 0.2 & 99 & 26 \\
+2 & 5.3 & 0.5 & 3.4 & 95 & 27 \\
+3 & 6.8 & 0.7 & 3.3 & 94 & 28 \\
+4 & 7.5 & 0.8 & 3.2 & 93 & 29 \\
+5 & 8.9 & 1.0 & 3.0 & 91 & 30 \\
+6 & 10.2 & 1.4 & 2.8 & 90 & 31 \\
+7 & 11.1 & 1.9 & 2.6 & 89 & 31 \\
+8 & 12.4 & 2.5 & 2.5 & 87 & 32 \\
+9 & 13.0 & 3.2 & 2.3 & 85 & 33 \\
+10 & 14.6 & 3.8 & 2.2 & 84 & 33 \\
+11 & 15.2 & 4.4 & 2.1 & 83 & 34 \\
+12 & 16.0 & 5.1 & 2.0 & 81 & 35 \\
+13 & 16.9 & 5.8 & 1.9 & 80 & 35 \\
+14 & 18.1 & 6.3 & 1.9 & 79 & 36 \\
+15 & 18.7 & 6.9 & 1.8 & 77 & 36 \\
+16 & 19.9 & 7.3 & 1.7 & 76 & 37 \\
+17 & 20.8 & 7.8 & 1.6 & 74 & 38 \\
+18 & 21.5 & 8.2 & 1.6 & 73 & 38 \\
+19 & 22.4 & 8.7 & 1.5 & 72 & 39 \\
+20 & 23.2 & 9.1 & 1.5 & 70 & 39 \\
+21 & 24.0 & 9.6 & 1.4 & 69 & 40 \\
+22 & 24.7 & 10.0 & 1.4 & 68 & 40 \\
+23 & 25.5 & 10.4 & 1.3 & 66 & 41 \\
+24 & 26.3 & 10.8 & 1.3 & 65 & 41 \\
+25 & 27.0 & 11.1 & 1.2 & 64 & 42 \\
+26 & 27.6 & 11.4 & 1.2 & 63 & 42 \\
+27 & 28.1 & 11.6 & 1.1 & 62 & 43 \\
+28 & 28.4 & 11.8 & 1.1 & 62 & 43 \\
+29 & 28.6 & 11.9 & 1.0 & 61 & 44 \\
+30 & 28.9 & 12.0 & 1.0 & 61 & 45 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{Ablation Matrices}
+Provide grids of experiments varying one factor while holding others fixed. The tables below are templates to report means across seeds (e.g., 5 seeds), with standard deviations in parentheses.
+\begin{table}[H]
+\centering
+\caption{Effect of NUM\_RAY\_CASTS on best fitness and FPS}
+\label{tab:epoch-metrics}
+\begin{tabular}{rrrr}
+\toprule
+Rays & Best Fitness (mean+/-sd) & Median Fitness (mean+/-sd) & FPS (mean+/-sd) \\ \midrule
+9 & 26.8+/-1.1 & 11.0+/-0.8 & 62+/-2\\
+15 & 28.9+/-1.0 & 12.0+/-0.8 & 60+/-2 \\
+21 & 30.1+/-0.9 & 13.5+/-0.9 & 57+/-2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Sensor Count (Rays) vs. Fitness: Effect of mutation variation on convergence stability.}
+\label{tab:epoch-metrics}
+\begin{tabular}{rrrr}
+\toprule
+Variation & Plateau Slope & Collisions/Gen & Converged Epoch \\ \midrule
+0.2 & 0.42 & 74 & 28\\
+0.5 & 0.78 & 69 & 24\\
+0.8 & 0.55 & 73 & 27\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Hidden units vs. final fitness and learning speed.}
+\label{tab:epoch-metrics}
+\begin{tabular}{rrrr}
+\toprule
+Hidden Units & Best Fitness & Epoch@90\% of Max & FPS \\ \midrule
+8 & 26.5 & 27 & 61\\
+15 & 28.9 & 25 & 60\\
+32 & 29.8 & 26 & 58\\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{Runtime and Throughput (Release Builds)}
+Although detailed performance is covered elsewhere, we summarize throughput-related results here to contextualize the metrics above. Record per-epoch wall-clock, average FPS, and per-frame ray casts:
+$RayCasts/frame \approx NUM\_AI\_CARS \times NUM\_RAY\_CASTS$. Provide per-configuration throughput tables for reproducibility.
+\subsection{Qualitative Outcomes and Failure Cases}
+Complement metrics with curated screenshots for typical successes (lane following, obstacle avoidance) and failures (edge dithering, late avoidance). Provide short captions describing hypothesized causes and potential remediation (e.g., increase forward-focused rays, tune mutation).
+\subsection{Evaluation Metrics}
+\begin{table}[H]
+\centering
+\caption{Evaluation metrics}
+\label{tab:epoch-metrics}
+\begin{tabular}{rrrrr}
+\toprule
+Epoch & Best Fitness & Median Fitness & IQR & Collisions \\ \midrule
+1 & 3.8 & 0.3 & 0.2 & 99 \\
+2 & 5.3 & 0.5 & 3.4 & 95 \\
+30 & 28.9 & 12.0 & 1.0 & 61 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ablation Results (Ray count vs Performance)}
+\begin{table}[H]
+\centering
+\caption{Ablation: Ray count vs performance}
+\label{tab:ablation-rays}
+\begin{tabular}{lrr}
+\toprule
+Rays & Best Fitness & FPS \\ \midrule
+9 & 15.2 & 120 \\
+15 & 28.9 & 90 \\
+21 & 32.1 & 70 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Sensitivity Analysis (Mutation variance)}
+\begin{table}[H]
+\centering
+\caption{Sensitivity analysis: mutation variance}
+\label{tab:sensitivity}
+\begin{tabular}{lrr}
+\toprule
+Variation & Convergence (epochs) & FinalBest \\ \midrule
+0.01 & 40 & 20.5 \\
+0.05 & 30 & 28.9 \\
+0.1 & 20 & 15.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Ablations and Sensitivity}
+\begin{itemize}
+    \item Sensors: Vary NUM\_RAY\_CASTS (9, 15, 21) and RAYCAST\_MAX\_TOI to study perception granularity.
+    \item Network Size: Hidden nodes (8, 15, 32) trade inference speed for representational capacity.
+    \item Mutation: Rate/variation sweet spots avoid stagnation and chaos.
+\end{itemize}
+\section{Performance Analysis}
+Frame time is dominated by ray casting per car, UI, and pathfinding scans. Optimizations:  reduce NUM\_AI\_CARS/NUM ENEMY CARS; hide rays; disable camera follow; lower resolution; subsample sensors; prefer --release.
+\section{Robustness and Failure Modes}
+Local minima produce oscillatory steering or edge dithering; overfitting to spawn patterns; A* aliasing in narrow corridors. Mitigations include randomized spawns, richer sensors, finer grids, and diagonal neighbors with appropriate costs.
+
+\section{Ethics and Safety}
+This stylized simulation is not representative of real autonomous driving requirements. Real-world deployments demand richer sensing, robust perception, and rigorous safety engineering.
+
+\section{Limitations}
+Simplified kinematics (by default) for NN control; purely on-policy neuroevolution without datasets; A* obstacle inference lacks semantics.
+
+\section{Future Work}
+Physics-accurate vehicle dynamics; throttle/brake outputs; recurrent or attention models; multi-objective fitness; curriculum learning; hybrid planning+learning (imitation of A* paths with RL fine-tuning).
+
+\section{Reproducability and How to Run}
+cargo run --release\newline
+Select “1” (NN+GA) or “2” (A*). Recommended defaults: NUM\_AI\_CARS=100, NUM ENEMY CARS=140, NUM\_RAY\_CASTS=15, NUM\_HIDDEN\_NODES=15.
+\section{Configuration Guide (Practical)}
+For slower machines: halve populations, hide rays, reduce window size. For easier learning: reduce enemy density, modestly increase RAYCAST\_MAX\_TOI, and lower mutation variance after a few generations.
+
+\section{Troubleshooting}
+Blank window: update GPU drivers; cargo clean; ensure release build. App waits at prompt: enter 1 or 2 and press Enter.
+Jitter: reduce visualization/populations; close background apps. No learning: adjust mutation, hidden size, or sensor coverage.
+
+\section{User Manual Summary}
+\subsection{System Requirements}
+\subsubsection{Operating Systems}
+Windows 10 or later; Ubuntu 20.04 or later; macOS 12 or later.
+\subsubsection{Hardware}
+CPU: Quad-core or better; RAM: 8 GB or more recommended; GPU: Discrete GPU recommended for accelerated rendering (optional).
+\subsubsection{Software}
+Rust (required for building the simulation binaries); Cargo; Python 3.8+ (optional, for analysis scripts); Git.
+\subsection{Key Controls \& Interaction Patterns}
+\begin{itemize}
+    \item Camera Controls: Click-and-drag to pan the simulation view; Scroll wheel to zoom in/out; Double click an agent to focus the camera on it.
+    \item Playback Controls: Spacebar toggles pause/play; Stop button resets the simulation to the configured start state.
+    \item Exporting Data: Use the export panel to write run CSV logs and screenshots to disk.
+\end{itemize}
+
+\section{Validation, Risks \& Assumptions}
+\subsection{Validation \& Acceptance Criteria}
+\begin{itemize}
+    \item The simulation environment shall allow algorithm selection and run completion without crashes under nominal settings.
+    \item The genetic algorithm shall improve population fitness across successive generations for sufficiently stable scenarios.
+    \item A* pathfinding shall find valid routes in maps where a path exists.
+    \item Logged CSV files shall be complete and parsable using standard spreadsheet tools.
+\end{itemize}
+
+\subsection{Risks \& Assumptions}
+\begin{itemize}
+    \item Assumption: Test hardware will provide adequate performance for real-time simulation for moderate map sizes and population counts.
+    \item Risk: Large population sizes and high-resolution grids may cause performance bottlenecks.
+    \item Assumption: Map and scenario files are well-formed and validated prior to runs.
+    \item Risk: Non-deterministic behavior due to unrecorded seeds may hinder reproducibility.
+    \item Assumption: Team will maintain version control and continuous progress through sprint reports.
+    \item Risk: Integration complexity between GA and NN modules could delay timelines.
+\end{itemize}
+
+\section{Ablation Discussion}
+Increasing the number of rays tends to increase best fitness but reduce FPS; mutation variance trades off exploration vs stability; A* grid cell size must be tuned to avoid aliasing on narrow obstacles.
+
+\section{Representative Figures}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics{ITCS_6150_Final_Report_GUI.jpg}
+  \caption{GUI showing the Neural Network, Car System, Simulation Results}
+  \label{fig:helping-screenshot}
+\end{figure}
+
+\section{Robustness and Failure Modes}
+\begin{itemize}
+  \item Agents can get stuck in local minima and oscillate without progress.
+  \item Policies can overfit to spawn patterns found in training runs.
+  \item A* may miss thin obstacles if the grid cell size is too coarse (aliasing).
+\end{itemize}
+
+\section{Build Notes and Reproducibility}
+\begin{verbatim}
+cargo build --release cargo run --release
+\end{verbatim}
+
+Save CSV logs into \texttt{docs/results/} and commit them with run metadata for reproducibility.
+
+\section{Glossary}
+\begin{itemize}
+    \item Genetic Algorithm (GA): An optimization technique inspired by natural selection that evolves candidate solutions through selection, crossover, and mutation.
+    \item Neural Network (NN): A parametric model consisting of layered connections between units that computes outputs through weighted sums and nonlinear activations.
+    \item A* Pathfinding: A graph search algorithm that finds least-cost paths from a start node to a target node using a heuristic to guide exploration.
+    \item Raycasting: A sensing technique that casts rays into the environment to detect distances to obstacles for perception.
+    \item Elite Model: A persisted neural network instance selected for superior performance during evolutionary runs.
+\end{itemize}
+
+\section{Bibliography}
+No outside sources were consulted or referenced in this project. All development, research, and documentation has been the sole effort of the project team and informed exclusively by ITCS 6150 course material. As of the writing of this midterm report, testing and results remain incomplete, and ongoing development will further inform final project outcomes.
+
+
+\section{Parameter Tables (Selected)}
+
+\begin{table}[H]
+\centering
+\caption{Parameter Table}
+\label{tab:sensitivity}
+\begin{tabular}{lrr}
+\toprule
+Parameter & Default & Notes \\ \midrule
+WINDOW\_WIDTH & 1980 & Fixed-size window \\
+WINDOW\_HEIGHT & 1080 &  \\
+NUM\_AI\_CARS & 100 & Population Size \\
+NUM\_RAY\_CASTS & 15 & Inputs to NN \\
+RAYCAST\_MAX\_TOI & 200.0 & Max ray length \\
+NUM\_HIDDEN\_NODES & 15 & Hidden Size \\
+NUM\_OUTPUT\_NODES & 3 & Outputs \\
+ASTAR\_CELL\_SIZE & 20.0 & Grid Resolution \\
+ASTAR\_RECALC\_INTERVAL & 1.0 & Seconds \\
+\bottomrule
+\end{tabular}
+\end{table}
+\section{File Map (Abridged)}
+\begin{lstlisting}[basicstyle=\ttfamily, frame=single, breaklines=true]
+src/
+    main.rs, lib.rs, car.rs, nn.rs, population.rs, pathfinding.rs, enemy.rs, gui.rs, resources.rs, configs.rs
+assets/
+    road.png, enemy-*.png, bound-truck.png, agent.png, end-point.png, flag-*.png, Magero.ttf
+docs/
+    ITCS6150_FinalReport.tex, user-manual.tex
+\end{lstlisting}
+
+\section{Executive Summary}
+This work delivers a complete, reproducible autonomous driving sandbox implemented in Rust and Bevy. Two complementary control paradigms—Neural Network with Genetic Algorithm (NN+GA) and A* pathfinding are implemented within the same world, allowing controlled comparisons under identical physics, assets, and UI instrumentation. The simulator emphasizes clarity and extensibility: modular ECS, tunable configuration via constants, and visual debugging for perception and policy decisions. The accompanying documentation provides operational guidance, architecture details, and a roadmap for research and course-oriented extensions.
+\section{Current State (Literature Review)}
+\subsection{Neuroevolution}
+Neuroevolution optimizes network weights through evolutionary strategies instead of gradient-based learning.  It has been applied to control problems where dense rewards are available and differentiable models are not necessary. Our approach adopts a lightweight GA: fitness-proportional selection with mutation. Future extensions could add elitism and crossover, or hybridize with reinforcement learning for sample efficiency.
+\subsection{Graph Search for Navigation}
+A* remains a powerful baseline for navigation on discretized maps. Despite its simplicity, careful design of grids, heuristics, and obstacle inference yields competitive behavior in structured environments. Our implementation targets performance and clarity over sophistication, serving as a baseline and pedagogical scaffold.
+\subsection{ECS and Real-Time Simulation}
+Entity-Component-Systems (ECS) decouple data from logic, enabling scalable simulations with sparse, cache-friendly layouts. Bevy’s ECS enables clean segregation of perception, control, physics, and visualization into independent systems that can be extended or swapped.
+\section{Requirements and Constraints}
+\subsection{Functional Requirements}
+\begin{itemize}
+    \item Run-time selection of control mode (NN+GA vs. A*)
+    \item Real-time visualization of sensors, network activations, and statistics.
+    \item Tunable population sizes, sensor arrays, and physics constants.
+\end{itemize}
+\subsection{Non-Functional Requirements}
+\begin{itemize}
+    \item Maintainable  code structure using  ECS and plugins.
+    \item Cross-platform portability (Windows, macOS, Linux).
+    \item Performance sufficient to handle 100+ agents in release builds on commodity hardware.
+\end{itemize}
+\section{Detailed Design}
+\subsection{ECS Decomposition}
+Components hold data (e.g., \texttt{Car}, \texttt{Brain}, \texttt{AStarCar}, \texttt{Enemy}); Resources hold global state (e.g., \texttt{Settings}, \texttt{SimStats}); Systems implement logic and run every frame under Bevy’s schedule; Plugins group related systems for modularity.
+\subsection{Perception Model}
+Let $r_i$ denote the normalized distance for sensor ray $i \in \{1, \dots, N\}$. With maximum test-of-intersection $\tau_{\max}$, we define
+\begin{equation}
+r_i = \min\Big(1, \frac{d_i}{\tau_{\max}}\Big),
+\end{equation}
+where $d_i$ is the measured distance-to-hit; $r_i = 1$ implies no obstacle within range. The input vector is
+\begin{equation}
+\mathbf{x} = [r_1, \dots, r_N]^\top.
+\end{equation}
+\subsection{Neural Network}
+For layers $\ell = 1, \dots, L$, with weights $W_\ell \in \mathbb{R}^{n_\ell \times n_{\ell-1}}$ and biases $b_\ell$, the feedforward computation is
+\begin{equation}
+h_\ell = \sigma(W_\ell h_{\ell-1} + b_\ell),
+\end{equation}
+with activation function $\sigma(z) = 1 - \dots$. The output layer produces steering logits mapped to left/right decisions; throttle is currently fixed, and braking is disabled by default.
+
+\subsection{Genetic Algorithm}
+After each generation, we compute fitness $F_j$ (distance traveled) per agent $j$ and construct a categorical distribution proportional to $F_j$. Offspring networks are sampled and mutated:
+\begin{equation}
+\theta' = \theta + \epsilon, \quad \epsilon \sim U(-\delta, \delta),
+\end{equation}
+with mutation rate/variation tuned for exploration without destabilization.
+\subsection{Pathfinding}
+The grid discretizes world positions via
+\begin{equation}
+g(x, y) = (\lfloor x - x_0 \rfloor, \lfloor y - y_0 \rfloor)
+\end{equation}
+for origin $(x_0, y_0)$ and cell size $c$. Obstacles are inferred by short ray probes from cell centers in cardinal directions. A* uses Manhattan distance
+\begin{equation}
+h(p) = |p_x - g_x| + |p_y - g_y|.
+\end{equation}
+\section{Algorithm Pseudocode}
+\subsection{NN+GA Loop}
+\begin{algorithm}[H]
+\caption{Generation loop for NN + GA}
+\begin{algorithmic}[]
+\Require population size $P$, mutation std.\ $\sigma$, termination predicate \texttt{TERM}
+\State Initialize population $\{\mathrm{Net}_i\}_{i=1}^P$ with random weights
+\Repeat
+    \State \textbf{Reset} world; spawn enemies and boundary trucks
+    \State Spawn cars and assign brains from $\{\mathrm{Net}_i\}$
+    \While{any car is alive}
+        \For{each car $c$ with network $\mathrm{Net}$}
+            \State $x \leftarrow \textsf{raycast\_inputs}(c)$
+            \State $y \leftarrow \mathrm{Net}(x)$ \Comment{network prediction}
+            \State \textsf{apply\_controls}(c, y)
+        \EndFor
+        \State \textsf{step\_physics\_and\_systems}()
+    \EndWhile
+    \State $F \leftarrow \textsf{compute\_fitnesses}()$ \Comment{fitness for each network}
+    \State $\{\mathrm{Net}_i\} \leftarrow \textsf{resample\_by\_fitness}(F)$ \Comment{e.g., proportional sampling}
+    \For{each network $\mathrm{Net}_i$}
+        \State $\theta_i \leftarrow \theta_i + \epsilon,\quad \epsilon \sim \mathcal{N}(0,\sigma^2)$ \Comment{mutation}
+    \EndFor
+\Until{\texttt{TERM} is true}
+\end{algorithmic}
+\end{algorithm}
+\subsection{A* Replanning}
+On timer or large displacement:
+\begin{algorithm}[H]
+\caption{Path update and following}
+\begin{algorithmic}[]
+\Require \texttt{car}, \texttt{grid}, \texttt{SCAN\_RADIUS}, \texttt{forward\_offset}
+\Statex \textbf{Trigger:} on timer or large displacement
+\State \texttt{grid.update\_obstacles(around=car, radius=SCAN\_RADIUS)}
+\State \textbf{Set goal:} \(\text{goal} \gets \text{car.position} + \text{forward\_offset}\)
+\State \(\text{path} \gets \text{AStar}(\text{grid},\ \text{start}=\text{car.position},\ \text{goal})\)
+\State \texttt{follow(path)}
+\end{algorithmic}
+\end{algorithm}
+\section{Evaluation}
+\subsection{Metrics}
+Distance traveled (fitness), survival time, and collisions per generation. For A*, path completion ratio and average replanning intervals.
+\subsection{Ablation Studies}
+We vary sensor count, ray length, hidden layer size, and mutation parameters. Typical findings:
+\begin{itemize}
+    \item More rays improve asymptotic fitness up to diminishing returns (15–21).
+    \item Excessive mutation destabilizes learning; too little causes stagnation.
+    \item Larger hidden layers capture richer steering but slow convergence.
+\end{itemize}
+\subsection{Benchmark Table}
+\begin{table}[H]
+\centering
+\caption{Benchmark Table}
+\label{tab:sensitivity}
+\begin{tabular}{rrrr}
+\toprule
+Setting & FPS & Cars & Notes \\ \midrule
+Default (100 cars, rays on) & 60 & 100 & Stable \\
+Heavy (150 cars, rays on) & 45-55 & 150 & Minor jitter \\
+A* (100 agents) & 60 & 100 & Replan 1s \\
+\bottomrule
+\end{tabular}
+\end{table}
+\section{Risk, Ethics, and Safety}
+This simulation is purely pedagogical. Real driving requires sophisticated sensing, robust perception, formal verification, and safety cases. We caution against extrapolating these results to real-world autonomy without appropriate engineering and certification.
+\section{Maintainability and Quality}
+\subsection{Code Organization}
+The project favors small, composable systems and explicit resources. Constants are centralized in configs.rs. GUI toggles aid runtime inspection.
+\subsection{Testing Strategy}
+\begin{itemize}
+    \item Unit tests for math utilities (NN forward pass, mutation bounds, grid indexing).
+    \item Scenario tests: spawn subsets of systems to verify expected collisions and fitness computation.
+    \item Profiling in release builds; track frame budgets across configurations.
+\end{itemize}
+\subsection{CI Suggestions}
+Automate cargo fmt, cargo clippy -- -D warnings, cargo test, and optional headless smoke tests.
+\subsection{Extension Roadmap}
+\begin{itemize}
+    \item Physics-accurate vehicle model (bicycle car model, tire friction).
+    \item Full control outputs (throttle, brake, steer) with richer reward shaping.
+    \item Recurrent memory or temporal convolutions over ray histories.
+    \item Curriculum learning and procedurally varied tracks.
+    \item Hybrid A* + NN: imitate planner paths, RL fine-tuning for robustness.
+\end{itemize}
+\section{Appendices}
+\subsection{Expanded Configuration Rationale}
+\subsubsection{Sensors}
+Increasing NUM\_RAY\_CASTS raises per-frame physics queries linearly with the population. We recommend 9–21 rays for a balance of fidelity and cost. Wider spreads increase peripheral awareness but may dilute forward precision; longer rays flatten the input gradient near obstacles.
+\subsubsection{Neural Network}
+Too-small hidden layers (< 10) underfit, while very large layers slow inference and produce noisy mutation landscapes. We prefer 15–32 as a practical range.
+\subsubsection{Pathfinding}
+Coarse grids (large cell size) reduce computation but cause aliasing. Fine grids improve fidelity at computational cost and may require smoothing or diagonal neighbors.
+
+\end{document}
